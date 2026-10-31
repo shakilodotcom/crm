@@ -319,6 +319,7 @@ function Detail({ p, onPatch, onDelete, onArchive, onClose, onMenu }: {
   const [notes, setNotes] = useState(p.notes);
   const [confirm, setConfirm] = useState(false);
   // The current list goes last (at the right edge), so opening shows the same tag in the same place.
+  // Tapping that tag closes the card like the rest of the row; only the faint option switches lists.
   const [order] = useState(() => (p.list === "team" ? KINDS : [...KINDS].reverse()));
   const area = useRef<HTMLTextAreaElement>(null);
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
@@ -358,7 +359,7 @@ function Detail({ p, onPatch, onDelete, onArchive, onClose, onMenu }: {
         {field("name", "Name")}
         <div className="kind" role="radiogroup" aria-label="List">
           {order.map((l) => (
-            <button key={l.id} role="radio" aria-checked={p.list === l.id} className={p.list === l.id ? "on" : ""} onClick={() => onPatch({ list: l.id })}>{l.one}</button>
+            <button key={l.id} role="radio" aria-checked={p.list === l.id} className={p.list === l.id ? "on" : ""} onClick={() => (p.list === l.id ? onClose() : onPatch({ list: l.id }))}>{l.one}</button>
           ))}
         </div>
       </div>
