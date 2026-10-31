@@ -391,10 +391,10 @@ function Detail({ p, onPatch, onClose, onMenu }: {
 }) {
   const [notes, setNotes] = useState(p.notes);
   // The tag stays a plain tag until it's tapped; only then does the other option appear beside it.
-  // The current list goes last (at the right edge on desktop), so the chosen one never moves.
+  // The current list goes first, right where the tag sits, so the chosen one never moves.
   const [choosing, setChoosing] = useState(false);
   const kindRef = useRef<HTMLDivElement>(null);
-  const order = p.list === "team" ? KINDS : [...KINDS].reverse();
+  const order = p.list === "team" ? [...KINDS].reverse() : KINDS;
   useEffect(() => {
     if (!choosing) return;
     const away = (e: PointerEvent) => { if (!kindRef.current?.contains(e.target as Node)) setChoosing(false); };
