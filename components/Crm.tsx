@@ -318,6 +318,8 @@ function Detail({ p, onPatch, onDelete, onArchive, onClose, onMenu }: {
 }) {
   const [notes, setNotes] = useState(p.notes);
   const [confirm, setConfirm] = useState(false);
+  // The current list goes first, so opening shows the same tag in the same place.
+  const [order] = useState(() => (p.list === "team" ? [...KINDS].reverse() : KINDS));
   const area = useRef<HTMLTextAreaElement>(null);
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
@@ -355,7 +357,7 @@ function Detail({ p, onPatch, onDelete, onArchive, onClose, onMenu }: {
       <div className="detail-top">
         {field("name", "Name")}
         <div className="kind" role="radiogroup" aria-label="List">
-          {KINDS.map((l) => (
+          {order.map((l) => (
             <button key={l.id} role="radio" aria-checked={p.list === l.id} className={p.list === l.id ? "on" : ""} onClick={() => onPatch({ list: l.id })}>{l.one}</button>
           ))}
         </div>
