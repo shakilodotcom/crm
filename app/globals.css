@@ -89,11 +89,12 @@ kbd { font: 11px var(--mono); color: var(--faint); border: 1px solid var(--line)
 .tag { font-size: 11px; font-weight: 500; color: var(--soft); border: 1px solid var(--line); border-radius: 999px; padding: 0 7px; flex: none; margin-left: auto; }
 .detail-top { display: flex; align-items: center; gap: 10px; min-height: 46px; padding: 0 14px; }
 .detail-top input.name { flex: 0 1 auto; min-width: 2ch; max-width: 100%; field-sizing: content; padding: 0; }
-/* In an open card the tag becomes a switch: the chosen one keeps the tag's outline in darker text, the other sits beside it faintly. */
+/* In an open card the tag looks unchanged; tapping it shows the other option faintly beside it, with the chosen one in darker text. */
 .kind { flex: none; display: flex; gap: 2px; margin-left: auto; }
 .kind button { font-size: 11px; font-weight: 500; padding: 0 7px; border: 1px solid transparent; border-radius: 999px; color: var(--faint); transition: color .12s, border-color .12s; }
 .kind button:hover { color: var(--soft); }
-.kind button.on { color: var(--ink); border-color: var(--line); cursor: pointer; }
+.kind button.on { color: var(--soft); border-color: var(--line); cursor: pointer; }
+.kind button.on:hover, .kind.choosing button.on { color: var(--ink); }
 
 .menu {
   position: fixed; z-index: 50; min-width: 210px; max-width: min(300px, calc(100vw - 16px)); padding: 4px;
@@ -126,3 +127,9 @@ kbd { font: 11px var(--mono); color: var(--faint); border: 1px solid var(--line)
 .login .error { margin: 0; font-size: 13px; color: var(--due); }
 .restore { display: inline-flex; margin-top: 16px; font-size: 13px; color: var(--soft); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 .restore:hover { color: var(--ink); }
+
+/* Phones: keep tags beside the name, away from the edge where thumbs land. */
+@media (max-width: 600px) {
+  .tag, .kind { margin-left: 0; }
+  .kind { flex-direction: row-reverse; } /* chosen option first, right where the tag was */
+}

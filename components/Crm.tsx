@@ -318,9 +318,19 @@ function Detail({ p, onPatch, onDelete, onArchive, onClose, onMenu }: {
 }) {
   const [notes, setNotes] = useState(p.notes);
   const [confirm, setConfirm] = useState(false);
-  // The current list goes last (at the right edge), so opening shows the same tag in the same place.
-  // Tapping that tag closes the card like the rest of the row; only the faint option switches lists.
-  const [order] = useState(() => (p.list === "team" ? KINDS : [...KINDS].reverse()));
+  // The tag stays a plain tag until it's tapped; only then does the other option appear beside it.
+  // The current list goes last (at the right edge on desktop), so the chosen one never moves.
+  const [choosing, setChoosing] = useState(false);
+  const kindRef = useRef<HTMLDivElement>(null);
+  const order = p.list === "team" ? KINDS : [...KINDS].reverse();
+  useEffect(() => {
+    if (!choosing) return;
+    const away = (e: PointerEvent) => { if (!kindRef.current?.contains(e.target as Node)) setChoosing(false); };
+    const esc = (e: KeyboardEvent) => { if (e.key === "Escape") setChoosing(false); };
+    addEventListener("pointerdown", away, true);
+    addEventListener("keydown", esc, true);
+    return () => { removeEventListener("pointerdown", away, true); removeEventListener("keydown", esc, true); };
+  }, [choosing]);
   const area = useRef<HTMLTextAreaElement>(null);
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
@@ -357,9 +367,16 @@ function Detail({ p, onPatch, onDelete, onArchive, onClose, onMenu }: {
       {/* Same size and place as the closed row, so opening feels like the row unfolding. */}
       <div className="detail-top">
         {field("name", "Name")}
-        <div className="kind" role="radiogroup" aria-label="List">
-          {order.map((l) => (
-            <button key={l.id} role="radio" aria-checked={p.list === l.id} className={p.list === l.id ? "on" : ""} onClick={() => (p.list === l.id ? onClose() : onPatch({ list: l.id }))}>{l.one}</button>
+        <div className={`kind ${choosing ? "choosing" : ""}`} ref={kindRef} role="radiogroup" aria-label="List">
+          {order.filter((l) => choosing || p.list === l.id).map((l) => (
+            <button
+              key={l.id} role="radio" aria-checked={p.list === l.id} className={p.list === l.id ? "on" : ""}
+              title={choosing ? undefined : "Change list"}
+              onClick={() => {
+                if (!choosing) setChoosing(true);
+                else { if (p.list !== l.id) onPatch({ list: l.id }); setChoosing(false); }
+              }}
+            >{l.one}</button>
           ))}
         </div>
       </div>
