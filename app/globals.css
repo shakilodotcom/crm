@@ -119,7 +119,7 @@ kbd { font: 11px var(--mono); color: var(--faint); border: 1px solid var(--line)
 
 /* sign-in */
 .login { max-width: 360px; margin: 0 auto; padding-block: clamp(64px, 20vh, 160px) 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: flex; flex-direction: column; gap: 20px; }
-.login img { width: 40px; height: 40px; border-radius: 10px; }
+.login img { display: block; width: 40px; height: 40px; }
 .login form { display: flex; align-items: center; border-bottom: 1px solid var(--line); transition: border-color .15s; }
 .login form:focus-within { border-color: var(--ink); }
 .login input:focus-visible { outline: none; }

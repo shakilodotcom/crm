@@ -7,6 +7,13 @@ export const metadata: Metadata = {
   title: "Sales",
   description: "Clients and team, in one simple list.",
   robots: { index: false, follow: false },
+  // The globe on a transparent background: dark lines on light tab bars, light lines on dark ones.
+  icons: {
+    icon: [
+      { url: "/icon-light.png", type: "image/png", media: "(prefers-color-scheme: light)" },
+      { url: "/icon-dark.png", type: "image/png", media: "(prefers-color-scheme: dark)" },
+    ],
+  },
 };
 
 export const viewport: Viewport = {
