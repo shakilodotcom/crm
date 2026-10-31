@@ -1,4 +1,4 @@
-export const metadata = { title: "Sign in" };
+export const metadata = { title: "Sign in · WeBuild Studio" };
 
 const ERRORS: Record<string, string> = {
   wrong: "That password isn't right.",

@@ -4,7 +4,7 @@ import { GeistMono } from "geist/font/mono";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Sales",
+  title: "WeBuild Studio",
   description: "Clients and team, in one simple list.",
   robots: { index: false, follow: false },
   // The globe on a transparent background: dark lines on light tab bars, light lines on dark ones.

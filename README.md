@@ -1,4 +1,4 @@
-# Sales
+# WeBuild Studio CRM
 
 A deliberately small CRM: one list of people, split into Clients, Team and Archives.
 Each person has a name, one line about who they are, and notes.
