@@ -5,18 +5,16 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
-    "seed": "node scripts/seed.mjs"
+    "start": "next start"
   },
   "dependencies": {
-    "better-sqlite3": "13.0.3",
     "geist": "^1.4.2",
     "next": "16.4.3",
+    "postgres": "^3.4.9",
     "react": "19.3.1",
     "react-dom": "19.3.1"
   },
   "devDependencies": {
-    "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^22.15.0",
     "@types/react": "^19.1.0",
     "@types/react-dom": "^19.1.0",

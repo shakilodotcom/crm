@@ -1,8 +1,8 @@
 import Crm from "@/components/Crm";
-import { listGroups, listPeople } from "@/lib/db";
+import { listPeople } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
-export default function Page() {
-  return <Crm initialPeople={listPeople()} initialGroups={listGroups()} />;
+export default async function Page() {
+  return <Crm initialPeople={await listPeople()} />;
 }

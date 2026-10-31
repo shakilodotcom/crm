@@ -1,50 +1,31 @@
-# People
+# Sales
 
-A small, self-hosted CRM for the people you work with. Inspired by folk, cut down to the essentials:
+A deliberately small CRM: one list of people, split into Clients, Team and Archives.
+Each person has a name, one line about who they are, and notes.
 
-- **People**: name, company, role, email, phone and one link
-- **Groups**: put people into lists such as Investors, Customers or Hiring. One person can be in several.
-- **Stages**: New → Reached out → In talks → Won / Parked, shown as a table or a drag-and-drop board
-- **History**: log notes, calls, emails and meetings. Logging updates "last touch".
-- **Follow-ups**: set a date per person. The Follow-ups view lists everyone due today or overdue.
-- **CSV import and export**: header names like `name`, `first name`/`last name`, `email`, `company`, `title` and `linkedin` are recognized
+- Type in the box at the top to find someone. Press Enter on a new name to add them.
+- Click a name to open it. Click a blank part of the card to close it.
+- Right-click (or press and hold on a phone) for Move, Copy email, Archive and Delete. Deletes can be undone.
 
-Everything is stored in one SQLite file (`data/crm.db`).
+## Deploy on Vercel
 
-## Run it
+1. In Vercel, **Add New → Project**, and import this GitHub repository.
+2. Before deploying, open **Environment Variables** and add `CRM_PASSWORD` with the password you want to sign in with.
+3. Click **Deploy**.
+4. In the project, open **Storage → Create Database → Neon (Postgres)**, and connect it to the project. This adds `DATABASE_URL` automatically.
+5. Go to **Deployments**, open the latest one's **⋯** menu and choose **Redeploy**, so it picks up the database.
+
+The table is created on first use. To bring people over from a backup, sign in while the list is empty and choose **Restore from a backup file**.
+
+## Run locally
 
 ```bash
 npm install
-npm run dev
+DATABASE_URL=postgres://… CRM_PASSWORD=… npm run dev
 ```
 
-Open http://localhost:3000.
+## How it's built
 
-To add example people (with the app running):
-
-```bash
-npm run seed
-```
-
-Production:
-
-```bash
-npm run build && npm start
-```
-
-Set `CRM_DB=/path/to/crm.db` to store the database somewhere else. Back up that file to back up everything.
-
-## Keyboard
-
-| Key | Action |
-| --- | --- |
-| `N` | New person |
-| `/` | Search |
-| `Esc` | Close panel |
-| `⌘/Ctrl + Enter` | Log the entry you're writing |
-
-## Stack
-
-Next.js (App Router) with a small JSON API under `app/api`, `better-sqlite3` for storage (`lib/db.ts`), and one client component for the UI (`components/Crm.tsx`).
-
-There is no login. Run it locally or behind your own auth, for example a VPN, Cloudflare Access or basic auth on your reverse proxy.
+Next.js (App Router). `proxy.ts` asks for the password before anything else loads; `lib/db.ts` talks to Postgres;
+`app/api/*` are the small JSON routes the page calls; `components/Crm.tsx` is the whole interface.
+Data lives only in the database, never in this repository.
