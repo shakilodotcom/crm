@@ -15,10 +15,6 @@ const LISTS: { id: Tab; label: string; one?: string }[] = [
 ];
 const KINDS = LISTS.filter((l) => l.one) as { id: List; label: string; one: string }[];
 
-// The list shows only who someone is; email and phone stay in the open card.
-const isContact = (part: string) => /@/.test(part) || /^[+()\d][\d\s()+\-‑.]{6,}$/.test(part);
-const shortAbout = (about: string) => about.split(/\s+·\s+/).filter((part) => part && !isContact(part.trim())).join(" · ");
-
 class SignedOut extends Error {}
 
 async function api<T>(method: string, url: string, body?: unknown): Promise<T> {
@@ -309,7 +305,7 @@ function Row({ p, open, tag, menuOpen, onMenu, onToggle, onPatch, onDelete, onAr
         onTouchEnd={cancel}
       >
         <span className="name">{p.name || "Unnamed"}</span>
-        <span className="about">{tag && <span className="tag">{tag}</span>}{shortAbout(p.about)}</span>
+        {tag && <span className="tag">{tag}</span>}
       </button>
       {open && <Detail p={p} onPatch={onPatch} onDelete={onDelete} onArchive={onArchive} onClose={onToggle} onMenu={onMenu} />}
     </li>
