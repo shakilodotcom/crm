@@ -60,7 +60,7 @@ kbd { font: 11px var(--mono); color: var(--faint); border: 1px solid var(--line)
 :root { interpolate-size: allow-keywords; }
 .detail-body {
   display: flex; flex-direction: column; gap: 2px; padding: 0 14px 14px;
-  height: auto; overflow: hidden; transition: height .22s ease, opacity .18s ease;
+  height: auto; overflow: hidden; transition: height .15s cubic-bezier(.2, .8, .2, 1), opacity .12s ease-out;
 }
 @starting-style { .detail-body { height: 0; opacity: 0; } }
 .detail .about { color: var(--soft); font-size: 14px; padding: 0; margin-bottom: 10px; align-self: flex-start; max-width: 100%; field-sizing: content; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
