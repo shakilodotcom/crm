@@ -70,7 +70,7 @@ kbd { font: 11px var(--mono); color: var(--faint); border: 1px solid var(--line)
 .notes:focus-within { border-top-color: var(--faint); }
 .detail textarea { width: 100%; resize: none; padding: 0 0 4px; line-height: 1.6; overflow: hidden; overflow-wrap: break-word; }
 
-.actions { display: flex; justify-content: flex-end; align-items: center; gap: 12px; flex-wrap: wrap; padding-top: 10px; border-top: 1px solid var(--line); }
+.actions { display: flex; justify-content: flex-start; align-items: center; gap: 12px; flex-wrap: wrap; padding-top: 10px; border-top: 1px solid var(--line); }
 .detail input:focus-visible, .detail textarea:focus-visible { outline: none; }
 .del, .confirm button { font-size: 13px; color: var(--faint); }
 .del:hover { color: var(--ink); }
