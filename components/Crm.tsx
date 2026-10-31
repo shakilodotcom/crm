@@ -42,6 +42,7 @@ export default function Crm({ initialPeople }: { initialPeople: Person[] }) {
   const [openId, setOpenId] = useState<string | null>(null);
   const [toast, setToast] = useState<Toast | null>(null);
   const [menu, setMenu] = useState<{ id: string; x: number; y: number } | null>(null);
+  const [swipedId, setSwipedId] = useState<string | null>(null);
   const input = useRef<HTMLInputElement>(null);
 
   useEffect(() => setTab(readTab()), []);
@@ -69,6 +70,16 @@ export default function Crm({ initialPeople }: { initialPeople: Person[] }) {
     document.addEventListener("visibilitychange", onShow);
     return () => document.removeEventListener("visibilitychange", onShow);
   }, [reload]);
+
+  // A swiped row slides back when you touch anywhere else or scroll.
+  useEffect(() => {
+    if (!swipedId) return;
+    const away = (e: Event) => { if (!(e.target as Element).closest?.(`li[data-id="${swipedId}"]`)) setSwipedId(null); };
+    const reset = () => setSwipedId(null);
+    addEventListener("pointerdown", away, true);
+    addEventListener("scroll", reset, true);
+    return () => { removeEventListener("pointerdown", away, true); removeEventListener("scroll", reset, true); };
+  }, [swipedId]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -192,6 +203,7 @@ export default function Crm({ initialPeople }: { initialPeople: Person[] }) {
           {shown.map((p) => (
             <Row
               key={p.id} p={p} open={openId === p.id} menuOpen={menu?.id === p.id}
+              swiped={swipedId === p.id} onSwipe={(on) => setSwipedId(on ? p.id : null)}
               tag={p.archived && !archiving ? "Archived" : tab === "all" || archiving || p.list !== tab ? KINDS.find((l) => l.id === p.list)!.one : ""}
               onToggle={() => setOpenId(openId === p.id ? null : p.id)}
               onMenu={(e) => {
@@ -281,43 +293,87 @@ function ContextMenu({ x, y, items, onClose }: { x: number; y: number; items: Me
 
 type MenuEvent = { preventDefault(): void; clientX: number; clientY: number; currentTarget: Element };
 
-function Row({ p, open, tag, menuOpen, onMenu, onToggle, onPatch, onDelete, onArchive }: {
-  p: Person; open: boolean; tag: string; menuOpen: boolean;
+const SWIPE_W = 168; // width of the Archive + Delete buttons revealed by a left swipe
+
+function Row({ p, open, tag, menuOpen, swiped, onSwipe, onMenu, onToggle, onPatch, onDelete, onArchive }: {
+  p: Person; open: boolean; tag: string; menuOpen: boolean; swiped: boolean;
+  onSwipe: (revealed: boolean) => void;
   onMenu: (e: MenuEvent) => void; onToggle: () => void;
   onPatch: (d: Partial<Person>) => void; onDelete: () => void; onArchive: () => void;
 }) {
   const press = useRef<ReturnType<typeof setTimeout> | "fired" | null>(null); // long-press timer on touch screens
-  const cancel = () => { if (press.current !== "fired" && press.current) clearTimeout(press.current); };
+  const cancelPress = () => { if (press.current !== "fired" && press.current) clearTimeout(press.current); };
+  // Swiping left slides the row over to show Archive and Delete behind it.
+  const drag = useRef<{ x: number; y: number; base: number; dir: "x" | "y" | null } | null>(null);
+  const moved = useRef(false);
+  const [offset, setOffset] = useState(0);
+  const [dragging, setDragging] = useState(false);
+  const offsetNow = useRef(0);
+  const slide = (o: number) => { offsetNow.current = o; setOffset(o); };
+  useEffect(() => { if (!dragging) slide(swiped ? -SWIPE_W : 0); }, [swiped, dragging]);
+
   return (
-    <li className={`row ${open ? "open" : ""} ${menuOpen ? "menu-on" : ""}`}>
+    <li className={`row ${open ? "open" : ""} ${menuOpen ? "menu-on" : ""} ${offset < 0 ? "swiping" : ""}`} data-id={p.id}>
+      {!open && offset < 0 && (
+        <div className="swipe-actions">
+          <button className="sa-archive" onClick={() => { onSwipe(false); onArchive(); }}>{p.archived ? "Restore" : "Archive"}</button>
+          <button className="sa-delete" onClick={() => { onSwipe(false); onDelete(); }}>Delete</button>
+        </div>
+      )}
       <button
         className="line" aria-expanded={open}
-        onClick={() => { if (press.current === "fired") { press.current = null; return; } onToggle(); }}
+        style={offset ? { transform: `translateX(${offset}px)`, transition: dragging ? "none" : undefined } : undefined}
+        onClick={() => {
+          if (press.current === "fired") { press.current = null; return; }
+          if (moved.current) { moved.current = false; return; }
+          if (swiped) { onSwipe(false); return; }
+          onToggle();
+        }}
         onContextMenu={onMenu}
         onTouchStart={(e) => {
           const el = e.currentTarget, { clientX, clientY } = e.touches[0];
+          drag.current = { x: clientX, y: clientY, base: swiped ? -SWIPE_W : 0, dir: null };
+          moved.current = false;
           press.current = setTimeout(() => {
             press.current = "fired";
             onMenu({ preventDefault() {}, clientX, clientY, currentTarget: el });
           }, 500);
         }}
-        onTouchMove={cancel}
-        onTouchEnd={cancel}
+        onTouchMove={(e) => {
+          const d = drag.current;
+          if (!d) return;
+          const { clientX, clientY } = e.touches[0];
+          const dx = clientX - d.x, dy = clientY - d.y;
+          if (!d.dir && (Math.abs(dx) > 8 || Math.abs(dy) > 8)) { d.dir = Math.abs(dx) > Math.abs(dy) ? "x" : "y"; cancelPress(); }
+          if (d.dir === "x" && !open) {
+            moved.current = true;
+            setDragging(true);
+            slide(Math.max(-SWIPE_W - 40, Math.min(0, d.base + dx)));
+          }
+        }}
+        onTouchEnd={() => {
+          cancelPress();
+          if (drag.current?.dir === "x" && !open) {
+            const reveal = offsetNow.current < -SWIPE_W / 2;
+            setDragging(false);
+            slide(reveal ? -SWIPE_W : 0);
+            onSwipe(reveal);
+          }
+          drag.current = null;
+        }}
       >
         <span className="name">{p.name || "Unnamed"}</span>
         {tag && <span className="tag">{tag}</span>}
       </button>
-      {open && <Detail p={p} onPatch={onPatch} onDelete={onDelete} onArchive={onArchive} onClose={onToggle} onMenu={onMenu} />}
+      {open && <Detail p={p} onPatch={onPatch} onClose={onToggle} onMenu={onMenu} />}
     </li>
   );
 }
 
-function Detail({ p, onPatch, onDelete, onArchive, onClose, onMenu }: {
-  p: Person; onPatch: (d: Partial<Person>) => void; onDelete: () => void; onArchive: () => void;
-  onClose: () => void; onMenu: (e: MenuEvent) => void;
+function Detail({ p, onPatch, onClose, onMenu }: {
+  p: Person; onPatch: (d: Partial<Person>) => void; onClose: () => void; onMenu: (e: MenuEvent) => void;
 }) {
   const [notes, setNotes] = useState(p.notes);
-  const [confirm, setConfirm] = useState(false);
   // The tag stays a plain tag until it's tapped; only then does the other option appear beside it.
   // The current list goes last (at the right edge on desktop), so the chosen one never moves.
   const [choosing, setChoosing] = useState(false);
@@ -358,7 +414,7 @@ function Detail({ p, onPatch, onDelete, onArchive, onClose, onMenu }: {
   // A click on a blank part of the card closes it; fields and buttons keep working.
   const downOnBlank = useRef(false);
   const isBlank = (el: EventTarget, x: number, y: number) =>
-    el === area.current ? blankInNotes(x, y) : !(el as HTMLElement).closest("input, textarea, button, label, a, .kind, .confirm");
+    el === area.current ? blankInNotes(x, y) : !(el as HTMLElement).closest("input, textarea, button, label, a, .kind");
 
   const field = (key: "name" | "about", label: string) => (
     <input
@@ -409,16 +465,6 @@ function Detail({ p, onPatch, onDelete, onArchive, onClose, onMenu }: {
           onChange={(e) => { const v = e.target.value; setNotes(v); pending.current = v; clearTimeout(timer.current); timer.current = setTimeout(() => saveNotes(v), 800); }}
           onBlur={(e) => saveNotes(e.target.value)}
         />
-      </div>
-      <div className="actions">
-        {confirm ? (
-          <span className="confirm">Delete {p.name || "this person"}? <button className="danger" onClick={onDelete}>Delete</button><button onClick={() => setConfirm(false)}>Keep</button></span>
-        ) : (
-          <span className="card-actions">
-            <button className="del" onClick={onArchive}>{p.archived ? "Restore" : "Archive"}</button>
-            <button className="del danger-hover" onClick={() => setConfirm(true)}>Delete</button>
-          </span>
-        )}
       </div>
       </div>
     </div>

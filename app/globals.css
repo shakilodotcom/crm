@@ -50,6 +50,8 @@ kbd { font: 11px var(--mono); color: var(--faint); border: 1px solid var(--line)
 .line {
   width: 100%; display: flex; align-items: center; gap: 10px;
   min-height: 46px; padding: 0 14px; text-align: left; border-radius: 12px;
+  position: relative; z-index: 1; background: var(--bg); touch-action: pan-y;
+  transition: transform .2s cubic-bezier(.2, .8, .2, 1), background .15s;
   -webkit-touch-callout: none; -webkit-user-select: none; user-select: none;
 }
 .row:not(.open) .line:hover { background: var(--raise); }
@@ -70,17 +72,10 @@ kbd { font: 11px var(--mono); color: var(--faint); border: 1px solid var(--line)
 .notes:focus-within { border-top-color: var(--faint); }
 .detail textarea { width: 100%; resize: none; padding: 0 0 4px; line-height: 1.6; overflow: hidden; overflow-wrap: break-word; }
 
-.actions { display: flex; justify-content: flex-start; align-items: center; gap: 12px; flex-wrap: wrap; padding-top: 10px; border-top: 1px solid var(--line); }
 .detail input:focus-visible, .detail textarea:focus-visible { outline: none; }
-.del, .confirm button { font-size: 13px; color: var(--faint); }
-.del:hover { color: var(--ink); }
-.del.danger-hover:hover { color: var(--due); }
-.card-actions { display: inline-flex; gap: 14px; }
-.confirm { font-size: 13px; color: var(--soft); display: inline-flex; gap: 10px; align-items: center; }
-.confirm .danger { color: var(--due); font-weight: 500; }
 
 
-.toast { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--bg); font-size: 13px; padding: 8px 14px; border-radius: 999px; }
+.toast { position: fixed; z-index: 60; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--bg); font-size: 13px; padding: 8px 14px; border-radius: 999px; }
 
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 
@@ -136,3 +131,11 @@ kbd { font: 11px var(--mono); color: var(--faint); border: 1px solid var(--line)
   .tag, .kind { margin-left: 0; }
   .kind { flex-direction: row-reverse; } /* chosen option first, right where the tag was */
 }
+
+/* Swipe a row left to reveal Archive and Delete behind it. */
+.row.swiping { overflow: hidden; }
+.row.swiping::before, .row.swiping + .row::before { opacity: 0; }
+.swipe-actions { position: absolute; top: 0; right: 0; bottom: 0; width: 168px; display: flex; }
+.swipe-actions button { flex: 1; font-size: 13px; font-weight: 500; color: #fff; }
+.sa-archive { background: var(--soft); }
+.sa-delete { background: var(--due); }
