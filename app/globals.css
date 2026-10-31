@@ -89,11 +89,11 @@ kbd { font: 11px var(--mono); color: var(--faint); border: 1px solid var(--line)
 .tag { font-size: 11px; font-weight: 500; color: var(--soft); border: 1px solid var(--line); border-radius: 999px; padding: 0 7px; flex: none; }
 .detail-top { display: flex; align-items: center; gap: 10px; min-height: 46px; padding: 0 14px; }
 .detail-top input.name { flex: 0 1 auto; min-width: 2ch; max-width: 100%; field-sizing: content; padding: 0; }
-/* In an open card the tag becomes a switch: the chosen one looks exactly like the tag, the other sits beside it faintly. */
+/* In an open card the tag becomes a switch: the chosen one keeps the tag's outline in darker text, the other sits beside it faintly. */
 .kind { flex: none; display: flex; gap: 2px; }
 .kind button { font-size: 11px; font-weight: 500; padding: 0 7px; border: 1px solid transparent; border-radius: 999px; color: var(--faint); transition: color .12s, border-color .12s; }
 .kind button:hover { color: var(--soft); }
-.kind button.on { color: var(--soft); border-color: var(--line); cursor: default; }
+.kind button.on { color: var(--ink); border-color: var(--line); cursor: default; }
 
 .menu {
   position: fixed; z-index: 50; min-width: 210px; max-width: min(300px, calc(100vw - 16px)); padding: 4px;
