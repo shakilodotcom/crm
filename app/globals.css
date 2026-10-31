@@ -10,10 +10,6 @@
   --font: var(--font-geist-sans), "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --mono: var(--font-geist-mono), "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
 }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) { --bg: #0a0a0a; --ink: #ededed; --soft: #8f8f8f; --faint: #5c5c5c; --line: #1f1f1f; --raise: #141414; --due: #ff6369; color-scheme: dark; }
-}
-:root[data-theme="dark"] { --bg: #0a0a0a; --ink: #ededed; --soft: #8f8f8f; --faint: #5c5c5c; --line: #1f1f1f; --raise: #141414; --due: #ff6369; color-scheme: dark; }
 
 * { box-sizing: border-box; }
 html { color-scheme: light; }
