@@ -118,11 +118,6 @@ export default function Crm({ initialPeople }: { initialPeople: Person[] }) {
     flash(`${on ? "Archived" : "Restored"} ${p.name || "person"}`, () => { setToast(null); patch(p.id, { archived: !on }); });
   };
 
-  const copyEmail = async (email: string) => {
-    try { await navigator.clipboard.writeText(email); flash("Email copied"); }
-    catch { flash(email); }
-  };
-
   const add = () => {
     const name = q.trim();
     if (!name) return;
@@ -219,14 +214,10 @@ export default function Crm({ initialPeople }: { initialPeople: Person[] }) {
 
       {menu && menuPerson && (() => {
         const p = menuPerson;
-        const email = (p.about + " " + p.notes).match(/[^\s@,;()<>]+@[^\s@,;()<>]+\.[a-z]{2,}/i)?.[0];
         const go = (fn: () => void) => () => { setMenu(null); fn(); };
         return (
           <ContextMenu x={menu.x} y={menu.y} onClose={() => setMenu(null)} items={[
             { label: openId === p.id ? "Close" : "Open", run: go(() => setOpenId(openId === p.id ? null : p.id)) },
-            null,
-            { label: p.list === "team" ? "Move to Clients" : "Move to Team", run: go(() => patch(p.id, { list: p.list === "team" ? "clients" : "team" })) },
-            email && { label: "Copy email", hint: email, run: go(() => copyEmail(email)) },
             null,
             { label: p.archived ? "Restore from archive" : "Archive", run: go(() => archive(p, !p.archived)) },
             { label: "Delete", danger: true, run: go(() => remove(p.id)) },
