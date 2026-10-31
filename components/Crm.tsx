@@ -336,6 +336,18 @@ function Detail({ p, onPatch, onDelete, onArchive, onClose, onMenu }: {
 
   // Grow the notes box with its text.
   useEffect(() => { const a = area.current; if (a) { a.style.height = "auto"; a.style.height = a.scrollHeight + "px"; } }, [notes]);
+
+  // A hidden copy of the notes, laid out identically, tells us where each line of text actually is.
+  // Taps on or near a line edit the notes; taps in the empty space around them act like the rest of the card.
+  const mirror = useRef<HTMLDivElement>(null);
+  const nearText = (x: number, y: number) => {
+    const m = mirror.current;
+    if (!m) return true;
+    const range = document.createRange();
+    range.selectNodeContents(m);
+    return Array.from(range.getClientRects()).some((r) => x >= r.left - 8 && x <= r.right + 24 && y >= r.top - 12 && y <= r.bottom + 12);
+  };
+  const blankInNotes = (x: number, y: number) => document.activeElement !== area.current && !nearText(x, y);
   // Save notes after a pause in typing, and on close.
   const pending = useRef<string | null>(null); // notes typed but not saved yet
   const saveNotes = (v: string) => { clearTimeout(timer.current); pending.current = null; if (v !== p.notes) onPatch({ notes: v.slice(0, 20000) }); };
@@ -345,7 +357,8 @@ function Detail({ p, onPatch, onDelete, onArchive, onClose, onMenu }: {
 
   // A click on a blank part of the card closes it; fields and buttons keep working.
   const downOnBlank = useRef(false);
-  const isBlank = (el: EventTarget) => !(el as HTMLElement).closest("input, textarea, button, label, a, .kind, .confirm");
+  const isBlank = (el: EventTarget, x: number, y: number) =>
+    el === area.current ? blankInNotes(x, y) : !(el as HTMLElement).closest("input, textarea, button, label, a, .kind, .confirm");
 
   const field = (key: "name" | "about", label: string) => (
     <input
@@ -360,8 +373,8 @@ function Detail({ p, onPatch, onDelete, onArchive, onClose, onMenu }: {
   return (
     <div
       className="detail"
-      onPointerDown={(e) => { downOnBlank.current = isBlank(e.target); }}
-      onClick={(e) => { if (downOnBlank.current && isBlank(e.target)) onClose(); }}
+      onPointerDown={(e) => { downOnBlank.current = isBlank(e.target, e.clientX, e.clientY); }}
+      onClick={(e) => { if (downOnBlank.current && isBlank(e.target, e.clientX, e.clientY)) onClose(); }}
       onContextMenu={(e) => { if (!(e.target as HTMLElement).closest("input, textarea")) onMenu(e); }}
     >
       {/* Same size and place as the closed row, so opening feels like the row unfolding. */}
@@ -382,11 +395,21 @@ function Detail({ p, onPatch, onDelete, onArchive, onClose, onMenu }: {
       </div>
       <div className="detail-body">
       {field("about", "Role, company, email")}
-      <textarea
-        id={`notes-${p.id}`} ref={area} rows={2} value={notes} placeholder="Notes" aria-label="Notes"
-        onChange={(e) => { const v = e.target.value; setNotes(v); pending.current = v; clearTimeout(timer.current); timer.current = setTimeout(() => saveNotes(v), 800); }}
-        onBlur={(e) => saveNotes(e.target.value)}
-      />
+      <div className="notes">
+        <div className="notes-mirror" ref={mirror} aria-hidden="true">{notes || "Notes"}</div>
+        <textarea
+          id={`notes-${p.id}`} ref={area} rows={2} value={notes} placeholder="Notes" aria-label="Notes"
+          // Don't start editing (or raise the phone keyboard) for a tap away from the text.
+          onMouseDown={(e) => { if (blankInNotes(e.clientX, e.clientY)) e.preventDefault(); }}
+          onTouchEnd={(e) => {
+            const t = e.changedTouches[0];
+            if (downOnBlank.current && blankInNotes(t.clientX, t.clientY)) { e.preventDefault(); onClose(); }
+          }}
+          onMouseMove={(e) => { e.currentTarget.style.cursor = blankInNotes(e.clientX, e.clientY) ? "pointer" : "text"; }}
+          onChange={(e) => { const v = e.target.value; setNotes(v); pending.current = v; clearTimeout(timer.current); timer.current = setTimeout(() => saveNotes(v), 800); }}
+          onBlur={(e) => saveNotes(e.target.value)}
+        />
+      </div>
       <div className="actions">
         {confirm ? (
           <span className="confirm">Delete {p.name || "this person"}? <button className="danger" onClick={onDelete}>Delete</button><button onClick={() => setConfirm(false)}>Keep</button></span>

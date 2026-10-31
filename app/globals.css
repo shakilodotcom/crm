@@ -63,12 +63,15 @@ kbd { font: 11px var(--mono); color: var(--faint); border: 1px solid var(--line)
   height: auto; overflow: hidden; transition: height .15s cubic-bezier(.2, .8, .2, 1), opacity .12s ease-out;
 }
 @starting-style { .detail-body { height: 0; opacity: 0; } }
-.detail .about { color: var(--soft); font-size: 14px; padding: 0; margin-bottom: 10px; align-self: flex-start; max-width: 100%; field-sizing: content; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.detail textarea { resize: none; min-height: 48px; padding: 10px 0; border-top: 1px solid var(--line); line-height: 1.6; overflow: hidden; }
+.detail .about { color: var(--soft); font-size: 14px; padding: 0 16px 0 0; margin-bottom: 10px; align-self: flex-start; max-width: 100%; field-sizing: content; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* The notes box spans the card; a hidden copy laid out the same way tells taps near the text from taps on blank space. */
+.notes { position: relative; display: flex; padding: 10px 0; border-top: 1px solid var(--line); transition: border-color .15s; }
+.notes-mirror { position: absolute; top: 10px; left: 0; right: 0; padding: 0 0 4px; line-height: 1.6; white-space: pre-wrap; overflow-wrap: break-word; visibility: hidden; pointer-events: none; }
+.notes:focus-within { border-top-color: var(--faint); }
+.detail textarea { width: 100%; resize: none; padding: 0 0 4px; line-height: 1.6; overflow: hidden; overflow-wrap: break-word; }
 
 .actions { display: flex; justify-content: flex-end; align-items: center; gap: 12px; flex-wrap: wrap; padding-top: 10px; border-top: 1px solid var(--line); }
 .detail input:focus-visible, .detail textarea:focus-visible { outline: none; }
-.detail textarea:focus { border-top-color: var(--faint); }
 .del, .confirm button { font-size: 13px; color: var(--faint); }
 .del:hover { color: var(--ink); }
 .del.danger-hover:hover { color: var(--due); }
