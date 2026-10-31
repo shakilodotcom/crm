@@ -51,7 +51,7 @@ kbd { font: 11px var(--mono); color: var(--faint); border: 1px solid var(--line)
   width: 100%; display: flex; align-items: center; gap: 10px;
   min-height: 46px; padding: 0 14px; text-align: left; border-radius: 12px;
   position: relative; z-index: 1; background: var(--bg); touch-action: pan-y;
-  transition: transform .2s cubic-bezier(.2, .8, .2, 1), background .15s;
+  transition: background .15s;
   -webkit-touch-callout: none; -webkit-user-select: none; user-select: none;
 }
 .row:not(.open) .line:hover { background: var(--raise); }
@@ -132,10 +132,14 @@ kbd { font: 11px var(--mono); color: var(--faint); border: 1px solid var(--line)
   .kind { flex-direction: row-reverse; } /* chosen option first, right where the tag was */
 }
 
-/* Swipe a row left to reveal Archive and Delete behind it. */
-.row.swiping { overflow: hidden; }
-.row.swiping::before, .row.swiping + .row::before { opacity: 0; }
-.swipe-actions { position: absolute; top: 0; right: 0; bottom: 0; width: 168px; display: flex; }
-.swipe-actions button { flex: 1; font-size: 13px; font-weight: 500; color: #fff; }
-.sa-archive { background: var(--soft); }
-.sa-delete { background: var(--due); }
+/* Swipe a row left and two small icon buttons slide in from its right edge; the row itself stays put. */
+.row { overflow: clip; }
+.swipe-actions {
+  position: absolute; z-index: 2; top: 0; right: 0; height: 46px; width: 100px;
+  display: flex; align-items: center; justify-content: flex-end; gap: 8px; padding-right: 14px;
+  background: linear-gradient(to right, transparent, var(--bg) 18px);
+  transition: transform .2s cubic-bezier(.2, .8, .2, 1);
+}
+.swipe-actions button { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; }
+.sa-archive { background: var(--raise); color: var(--ink); box-shadow: inset 0 0 0 1px var(--line); }
+.sa-delete { background: #fdeceb; color: var(--due); }

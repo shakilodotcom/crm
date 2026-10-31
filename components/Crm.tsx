@@ -293,7 +293,16 @@ function ContextMenu({ x, y, items, onClose }: { x: number; y: number; items: Me
 
 type MenuEvent = { preventDefault(): void; clientX: number; clientY: number; currentTarget: Element };
 
-const SWIPE_W = 168; // width of the Archive + Delete buttons revealed by a left swipe
+const SWIPE_W = 100; // room taken by the Archive and Delete buttons that slide in on a left swipe
+
+const Icon = ({ d }: { d: string }) => (
+  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={d} /></svg>
+);
+const ICONS = {
+  archive: "M3.5 7.5h17M5 7.5v11a1.5 1.5 0 0 0 1.5 1.5h11a1.5 1.5 0 0 0 1.5-1.5v-11M4 4h16v3.5H4zM10 11.5h4",
+  restore: "M3.5 7.5h17M5 7.5v11a1.5 1.5 0 0 0 1.5 1.5h11a1.5 1.5 0 0 0 1.5-1.5v-11M4 4h16v3.5H4zM12 17v-5.5M9.5 14 12 11.5l2.5 2.5",
+  delete: "M4 7h16M10 11v6M14 11v6M5.5 7l1 12a1.5 1.5 0 0 0 1.5 1.4h8a1.5 1.5 0 0 0 1.5-1.4l1-12M9 7V4.5h6V7",
+};
 
 function Row({ p, open, tag, menuOpen, swiped, onSwipe, onMenu, onToggle, onPatch, onDelete, onArchive }: {
   p: Person; open: boolean; tag: string; menuOpen: boolean; swiped: boolean;
@@ -314,15 +323,22 @@ function Row({ p, open, tag, menuOpen, swiped, onSwipe, onMenu, onToggle, onPatc
 
   return (
     <li className={`row ${open ? "open" : ""} ${menuOpen ? "menu-on" : ""} ${offset < 0 ? "swiping" : ""}`} data-id={p.id}>
-      {!open && offset < 0 && (
-        <div className="swipe-actions">
-          <button className="sa-archive" onClick={() => { onSwipe(false); onArchive(); }}>{p.archived ? "Restore" : "Archive"}</button>
-          <button className="sa-delete" onClick={() => { onSwipe(false); onDelete(); }}>Delete</button>
+      {!open && (
+        // The row stays put; the buttons slide in from the right edge, following the finger.
+        <div
+          className="swipe-actions" aria-hidden={!swiped}
+          style={{ transform: `translateX(${SWIPE_W + offset}px)`, transition: dragging ? "none" : undefined, visibility: offset < 0 ? "visible" : "hidden" }}
+        >
+          <button className="sa-archive" tabIndex={swiped ? 0 : -1} aria-label={p.archived ? "Restore" : "Archive"} onClick={() => { onSwipe(false); onArchive(); }}>
+            <Icon d={p.archived ? ICONS.restore : ICONS.archive} />
+          </button>
+          <button className="sa-delete" tabIndex={swiped ? 0 : -1} aria-label="Delete" onClick={() => { onSwipe(false); onDelete(); }}>
+            <Icon d={ICONS.delete} />
+          </button>
         </div>
       )}
       <button
         className="line" aria-expanded={open}
-        style={offset ? { transform: `translateX(${offset}px)`, transition: dragging ? "none" : undefined } : undefined}
         onClick={() => {
           if (press.current === "fired") { press.current = null; return; }
           if (moved.current) { moved.current = false; return; }
@@ -348,13 +364,13 @@ function Row({ p, open, tag, menuOpen, swiped, onSwipe, onMenu, onToggle, onPatc
           if (d.dir === "x" && !open) {
             moved.current = true;
             setDragging(true);
-            slide(Math.max(-SWIPE_W - 40, Math.min(0, d.base + dx)));
+            slide(Math.max(-SWIPE_W - 24, Math.min(0, d.base + dx)));
           }
         }}
         onTouchEnd={() => {
           cancelPress();
           if (drag.current?.dir === "x" && !open) {
-            const reveal = offsetNow.current < -SWIPE_W / 2;
+            const reveal = offsetNow.current < -SWIPE_W * 0.6;
             setDragging(false);
             slide(reveal ? -SWIPE_W : 0);
             onSwipe(reveal);
