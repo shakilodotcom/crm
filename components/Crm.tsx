@@ -318,8 +318,8 @@ function Detail({ p, onPatch, onDelete, onArchive, onClose, onMenu }: {
 }) {
   const [notes, setNotes] = useState(p.notes);
   const [confirm, setConfirm] = useState(false);
-  // The current list goes first, so opening shows the same tag in the same place.
-  const [order] = useState(() => (p.list === "team" ? [...KINDS].reverse() : KINDS));
+  // The current list goes last (at the right edge), so opening shows the same tag in the same place.
+  const [order] = useState(() => (p.list === "team" ? KINDS : [...KINDS].reverse()));
   const area = useRef<HTMLTextAreaElement>(null);
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
