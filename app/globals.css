@@ -42,14 +42,16 @@ kbd { font: 11px var(--mono); color: var(--faint); border: 1px solid var(--line)
 
 .list { list-style: none; margin: 0; padding: 0; }
 
-.row { border-radius: 12px; transition: background .15s; margin: 0 -14px; position: relative; }
-.row + .row::before { content: ""; position: absolute; top: 0; left: 14px; right: 14px; height: 1px; background: var(--line); transition: opacity .15s; }
+/* --bleed: how far a row's highlight reaches past the text column (less on phones, so open cards don't span the screen). */
+.list { --bleed: 14px; }
+.row { border-radius: 12px; transition: background .15s; margin: 0 calc(-1 * var(--bleed)); position: relative; }
+.row + .row::before { content: ""; position: absolute; top: 0; left: var(--bleed); right: var(--bleed); height: 1px; background: var(--line); transition: opacity .15s; z-index: 3; pointer-events: none; }
 .row:hover::before, .row:hover + .row::before, .row.open::before, .row.open + .row::before, .row.menu-on::before, .row.menu-on + .row::before { opacity: 0; }
 .row.menu-on .line { background: var(--raise); }
 .row.open { background: var(--raise); }
 .line {
   width: 100%; display: flex; align-items: center; gap: 10px;
-  min-height: 46px; padding: 0 14px; text-align: left; border-radius: 12px;
+  min-height: 46px; padding: 0 var(--bleed); text-align: left; border-radius: 12px;
   position: relative; z-index: 1; background: var(--bg); touch-action: pan-y;
   transition: background .15s;
   -webkit-touch-callout: none; -webkit-user-select: none; user-select: none;
@@ -61,7 +63,7 @@ kbd { font: 11px var(--mono); color: var(--faint); border: 1px solid var(--line)
 /* The open card keeps the row's exact header, then unfolds the rest below it. */
 :root { interpolate-size: allow-keywords; }
 .detail-body {
-  display: flex; flex-direction: column; gap: 2px; padding: 0 14px 14px;
+  display: flex; flex-direction: column; gap: 2px; padding: 0 var(--bleed) 14px;
   height: auto; overflow: hidden; transition: height .15s cubic-bezier(.2, .8, .2, 1), opacity .12s ease-out;
 }
 @starting-style { .detail-body { height: 0; opacity: 0; } }
@@ -85,7 +87,7 @@ kbd { font: 11px var(--mono); color: var(--faint); border: 1px solid var(--line)
 .tabs button.on { color: var(--ink); font-weight: 500; }
 .tabs .n { font-size: 12px; color: var(--faint); font-weight: 400; font-variant-numeric: tabular-nums; }
 .tag { font-size: 11px; font-weight: 500; color: var(--soft); border: 1px solid var(--line); border-radius: 999px; padding: 0 7px; flex: none; }
-.detail-top { display: flex; align-items: center; gap: 10px; min-height: 46px; padding: 0 14px; }
+.detail-top { display: flex; align-items: center; gap: 10px; min-height: 46px; padding: 0 var(--bleed); }
 .detail-top input.name { flex: 0 1 auto; min-width: 2ch; max-width: 100%; field-sizing: content; padding: 0; }
 /* In an open card the tag looks unchanged; tapping it shows the other option faintly beside it, with the chosen one in darker text. */
 .kind { flex: none; display: flex; gap: 2px; }
@@ -131,10 +133,16 @@ kbd { font: 11px var(--mono); color: var(--faint); border: 1px solid var(--line)
 .row { overflow: clip; }
 .swipe-actions {
   position: absolute; z-index: 2; top: 0; right: 0; height: 46px; width: 100px;
-  display: flex; align-items: center; justify-content: flex-end; gap: 8px; padding-right: 14px;
+  display: flex; align-items: center; justify-content: flex-end; gap: 8px; padding-right: var(--bleed);
   background: linear-gradient(to right, transparent, var(--bg) 18px);
   transition: transform .2s cubic-bezier(.2, .8, .2, 1);
 }
 .swipe-actions button { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; }
 .sa-archive { background: var(--raise); color: var(--ink); box-shadow: inset 0 0 0 1px var(--line); }
 .sa-delete { background: #fdeceb; color: var(--due); }
+
+/* Phones: open cards stop short of the screen edges. */
+@media (max-width: 600px) {
+  .list { --bleed: 6px; }
+  .row { border-radius: 8px; } /* small enough that the corners don't nick the divider lines */
+}
