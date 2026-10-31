@@ -307,13 +307,13 @@ function Row({ p, open, tag, menuOpen, onMenu, onToggle, onPatch, onDelete, onAr
         <span className="name">{p.name || "Unnamed"}</span>
         {tag && <span className="tag">{tag}</span>}
       </button>
-      {open && <Detail p={p} tag={tag} onPatch={onPatch} onDelete={onDelete} onArchive={onArchive} onClose={onToggle} onMenu={onMenu} />}
+      {open && <Detail p={p} onPatch={onPatch} onDelete={onDelete} onArchive={onArchive} onClose={onToggle} onMenu={onMenu} />}
     </li>
   );
 }
 
-function Detail({ p, tag, onPatch, onDelete, onArchive, onClose, onMenu }: {
-  p: Person; tag: string; onPatch: (d: Partial<Person>) => void; onDelete: () => void; onArchive: () => void;
+function Detail({ p, onPatch, onDelete, onArchive, onClose, onMenu }: {
+  p: Person; onPatch: (d: Partial<Person>) => void; onDelete: () => void; onArchive: () => void;
   onClose: () => void; onMenu: (e: MenuEvent) => void;
 }) {
   const [notes, setNotes] = useState(p.notes);
@@ -354,7 +354,6 @@ function Detail({ p, tag, onPatch, onDelete, onArchive, onClose, onMenu }: {
       {/* Same size and place as the closed row, so opening feels like the row unfolding. */}
       <div className="detail-top">
         {field("name", "Name")}
-        {tag && <span className="tag">{tag}</span>}
         <div className="kind" role="radiogroup" aria-label="List">
           {KINDS.map((l) => (
             <button key={l.id} role="radio" aria-checked={p.list === l.id} className={p.list === l.id ? "on" : ""} onClick={() => onPatch({ list: l.id })}>{l.one}</button>
